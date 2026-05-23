@@ -1,5 +1,5 @@
 const CACHE = 'our-story-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
