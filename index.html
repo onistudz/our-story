@@ -13,9 +13,9 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Josefin+Sans:wght@300;400;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
 
     body {
       min-height: 100dvh;
@@ -25,9 +25,10 @@
       background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 30%, #f48fb1 60%, #fce4ec 100%);
       background-size: 400% 400%;
       animation: gradientShift 12s ease infinite;
-      font-family: 'Lato', sans-serif;
+      font-family: 'Josefin Sans', sans-serif;
       overflow: hidden;
       position: relative;
+      touch-action: none;
     }
 
     @keyframes gradientShift {
@@ -82,26 +83,27 @@
     }
 
     .label {
-      font-family: 'Lato', sans-serif;
+      font-family: 'Josefin Sans', sans-serif;
       font-weight: 300;
       font-size: 0.9rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: #c2185b;
       margin-bottom: 0.8rem;
+      transition: opacity 1s ease;
     }
 
     .day-number {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: clamp(4rem, 16vw, 6.5rem);
-      font-weight: 700;
+      font-weight: 600;
       color: #ad1457;
       line-height: 1;
       margin-bottom: 0.15rem;
     }
 
     .day-word {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 1.1rem;
       font-style: italic;
       color: #e91e8c;
@@ -132,9 +134,9 @@
     }
 
     .unit-value {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 2rem;
-      font-weight: 700;
+      font-weight: 600;
       color: #ad1457;
       line-height: 1;
     }
@@ -149,7 +151,7 @@
     }
 
     .unit-sep {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 1.6rem;
       color: #f48fb1;
       align-self: center;
@@ -157,7 +159,7 @@
     }
 
     .clock {
-      font-family: 'Lato', sans-serif;
+      font-family: 'Josefin Sans', sans-serif;
       font-weight: 300;
       font-size: 0.95rem;
       letter-spacing: 0.12em;
@@ -167,11 +169,11 @@
     }
 
     .since {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-style: italic;
-      font-size: 0.85rem;
+      font-size: 1rem;
       color: #c2185b;
-      opacity: 0.65;
+      opacity: 0.75;
     }
   </style>
 </head>
@@ -181,7 +183,7 @@
 
   <div class="card">
     <span class="emoji-top">🌸</span>
-    <p class="label">on est ensemble depuis</p>
+    <p class="label" id="label"></p>
     <div class="day-number" id="totalDays">—</div>
     <div class="day-word">jours</div>
     <div class="divider"></div>
@@ -206,6 +208,36 @@
   </div>
 
   <script>
+    const CLASSIC = ['ensemble depuis'];
+    const SURPRISE = [
+      'amoureux depuis',
+      'notre belle histoire, depuis',
+      'inséparables depuis',
+      'toi et moi, depuis',
+      'in love since',
+      'together since',
+      'my favourite, since',
+      'forever started here',
+      'partners in crime since',
+      'you + me, since'
+    ];
+
+    function pickPhrase() {
+      const pool = Math.random() < 0.8 ? CLASSIC : SURPRISE;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    const labelEl = document.getElementById('label');
+    labelEl.textContent = pickPhrase();
+
+    setInterval(() => {
+      labelEl.style.opacity = '0';
+      setTimeout(() => {
+        labelEl.textContent = pickPhrase();
+        labelEl.style.opacity = '1';
+      }, 1000);
+    }, 2 * 60 * 1000);
+
     const START = new Date('2024-03-16T00:00:00');
 
     function pad(n) { return String(n).padStart(2, '0'); }
@@ -260,6 +292,66 @@
 
     for (let i = 0; i < 12; i++) setTimeout(spawnHeart, i * 600);
     setInterval(spawnHeart, 1800);
+
+    // Burst / trail hearts on tap & drag
+    let pressPos = null;
+    let lastTrail = null;
+    let holdInterval = null;
+    const TRAIL_DIST = 40;
+
+    function spawnBurstHeart(x, y) {
+      const el = document.createElement('span');
+      el.style.cssText = `position:fixed;left:${x}px;top:${y}px;font-size:${0.8 + Math.random() * 1.2}rem;pointer-events:none;z-index:100;user-select:none;`;
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      document.body.appendChild(el);
+      const angle = (Math.random() - 0.5) * Math.PI;
+      const dist = 60 + Math.random() * 80;
+      const dur = 700 + Math.random() * 400;
+      let start = null;
+      function animate(ts) {
+        if (!start) start = ts;
+        const t = Math.min((ts - start) / dur, 1);
+        const dx = Math.sin(angle) * dist * t;
+        const dy = -Math.cos(angle) * dist * t;
+        el.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        el.style.opacity = String(1 - t);
+        if (t < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function stopPress() {
+      pressPos = null;
+      lastTrail = null;
+      clearInterval(holdInterval);
+      holdInterval = null;
+    }
+
+    document.addEventListener('pointerdown', e => {
+      pressPos = { x: e.clientX, y: e.clientY };
+      lastTrail = { x: e.clientX, y: e.clientY };
+      const count = 5 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) spawnBurstHeart(e.clientX, e.clientY);
+      holdInterval = setInterval(() => {
+        if (pressPos) spawnBurstHeart(pressPos.x, pressPos.y);
+      }, 120);
+    });
+
+    document.addEventListener('pointermove', e => {
+      if (!pressPos || !lastTrail) return;
+      pressPos = { x: e.clientX, y: e.clientY };
+      const dx = e.clientX - lastTrail.x;
+      const dy = e.clientY - lastTrail.y;
+      if (Math.sqrt(dx * dx + dy * dy) >= TRAIL_DIST) {
+        spawnBurstHeart(e.clientX, e.clientY);
+        lastTrail = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    document.addEventListener('pointerup', stopPress);
+    document.addEventListener('pointercancel', stopPress);
+    document.addEventListener('contextmenu', e => e.preventDefault());
 
     // PWA service worker
     if ('serviceWorker' in navigator) {
