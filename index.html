@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Josefin+Sans:wght@300;400;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
 
     body {
       min-height: 100dvh;
@@ -37,7 +37,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Floating hearts */
     .hearts {
       position: fixed;
       inset: 0;
@@ -60,7 +59,6 @@
       100% { transform: translateY(-110vh) rotate(30deg) scale(1.2); opacity: 0; }
     }
 
-    /* Card */
     .card {
       background: rgba(255, 255, 255, 0.55);
       backdrop-filter: blur(18px);
@@ -74,6 +72,12 @@
       box-shadow: 0 8px 48px rgba(244, 143, 177, 0.25), 0 2px 8px rgba(0,0,0,0.06);
       position: relative;
       z-index: 10;
+      animation: cardIn 0.5s ease-out both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .emoji-top {
@@ -93,37 +97,64 @@
       transition: opacity 1s ease;
     }
 
+    .day-streak {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+
+    .fire-emoji {
+      font-size: clamp(2.2rem, 9vw, 3.8rem);
+      animation: fireFlicker 2s ease-in-out infinite;
+      display: inline-block;
+      margin-top: 0.4em;
+      justify-self: end;
+      padding-right: 0.1em;
+    }
+
+    @keyframes fireFlicker {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50%       { transform: scale(1.08); filter: brightness(1.2); }
+    }
+
     .day-number {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(4rem, 16vw, 6.5rem);
       font-weight: 600;
       color: #ad1457;
       line-height: 1;
-      margin-bottom: 0.15rem;
-    }
-
-    .day-word {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-style: italic;
-      color: #e91e8c;
-      margin-bottom: 1.6rem;
-      letter-spacing: 0.04em;
     }
 
     .divider {
       width: 48px;
       height: 2px;
       background: linear-gradient(90deg, transparent, #f48fb1, transparent);
-      margin: 0 auto 1.6rem;
+      margin: 0 auto 1.2rem;
       border-radius: 1px;
+    }
+
+    .divider.mini {
+      width: 28px;
+      opacity: 0.5;
+      margin: 0 auto 0.7rem;
+    }
+
+    .since-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: #c2185b;
+      opacity: 0.6;
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.02em;
     }
 
     .breakdown {
       display: flex;
       justify-content: center;
       gap: 1.6rem;
-      margin-bottom: 1.6rem;
+      margin-bottom: 1.4rem;
     }
 
     .unit {
@@ -141,6 +172,10 @@
       line-height: 1;
     }
 
+    .unit-value.sm {
+      font-size: 1.35rem;
+    }
+
     .unit-label {
       font-size: 0.7rem;
       font-weight: 700;
@@ -148,6 +183,11 @@
       text-transform: uppercase;
       color: #e91e8c;
       opacity: 0.75;
+    }
+
+    .unit-label.sm {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
     }
 
     .unit-sep {
@@ -158,22 +198,15 @@
       padding-bottom: 0.6rem;
     }
 
-    .clock {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 0.95rem;
-      letter-spacing: 0.12em;
-      color: #c2185b;
-      opacity: 0.7;
-      margin-bottom: 1.4rem;
+    .unit-sep.sm {
+      font-size: 1.1rem;
+      padding-bottom: 0.35rem;
     }
 
-    .since {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 1rem;
-      color: #c2185b;
-      opacity: 0.75;
+    .clock-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
     }
   </style>
 </head>
@@ -184,9 +217,11 @@
   <div class="card">
     <span class="emoji-top">🌸</span>
     <p class="label" id="label"></p>
-    <div class="day-number" id="totalDays">—</div>
-    <div class="day-word">jours</div>
+    <div class="day-streak">
+      <span class="fire-emoji">🔥</span><span class="day-number" id="totalDays">—</span><span></span>
+    </div>
     <div class="divider"></div>
+    <div class="since-header">depuis le 16 mars 2024 💕</div>
     <div class="breakdown">
       <div class="unit">
         <span class="unit-value" id="years">—</span>
@@ -203,8 +238,23 @@
         <span class="unit-label">jours</span>
       </div>
     </div>
-    <div class="clock" id="clock">00:00:00</div>
-    <div class="since">depuis le 16 mars 2024 💕</div>
+    <div class="divider mini"></div>
+    <div class="clock-breakdown">
+      <div class="unit">
+        <span class="unit-value sm" id="elapsedH">00</span>
+        <span class="unit-label sm">h</span>
+      </div>
+      <div class="unit-sep sm">·</div>
+      <div class="unit">
+        <span class="unit-value sm" id="elapsedM">00</span>
+        <span class="unit-label sm">min</span>
+      </div>
+      <div class="unit-sep sm">·</div>
+      <div class="unit">
+        <span class="unit-value sm" id="elapsedS">00</span>
+        <span class="unit-label sm">s</span>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -230,13 +280,15 @@
     const labelEl = document.getElementById('label');
     labelEl.textContent = pickPhrase();
 
-    setInterval(() => {
+    function rotateLabel() {
       labelEl.style.opacity = '0';
       setTimeout(() => {
         labelEl.textContent = pickPhrase();
         labelEl.style.opacity = '1';
       }, 1000);
-    }, 2 * 60 * 1000);
+    }
+
+    setInterval(rotateLabel, 80 * 1000);
 
     const START = new Date('2024-03-16T00:00:00');
 
@@ -266,8 +318,11 @@
       document.getElementById('years').textContent  = y;
       document.getElementById('months').textContent = m;
       document.getElementById('days').textContent   = d;
-      document.getElementById('clock').textContent  =
-        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const totalSec = Math.floor((now - START) / 1000);
+      document.getElementById('elapsedH').textContent = pad(Math.floor(totalSec / 3600) % 24);
+      document.getElementById('elapsedM').textContent = pad(Math.floor(totalSec / 60) % 60);
+      document.getElementById('elapsedS').textContent = pad(totalSec % 60);
     }
 
     tick();
@@ -297,7 +352,9 @@
     let pressPos = null;
     let lastTrail = null;
     let holdInterval = null;
+    let holdTicks = 0;
     const TRAIL_DIST = 40;
+    const HOLD_ROTATE_TICKS = Math.round(10000 / 120);
 
     function spawnBurstHeart(x, y) {
       const el = document.createElement('span');
@@ -326,34 +383,58 @@
       lastTrail = null;
       clearInterval(holdInterval);
       holdInterval = null;
+      holdTicks = 0;
+    }
+
+    function startPress(x, y) {
+      pressPos = { x, y };
+      lastTrail = { x, y };
+      holdTicks = 0;
+      const count = 5 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) spawnBurstHeart(x, y);
+      holdInterval = setInterval(() => {
+        if (pressPos) spawnBurstHeart(pressPos.x, pressPos.y);
+        holdTicks++;
+        if (holdTicks === HOLD_ROTATE_TICKS) rotateLabel();
+      }, 120);
+    }
+
+    function movePress(x, y) {
+      if (!pressPos || !lastTrail) return;
+      pressPos = { x, y };
+      const dx = x - lastTrail.x;
+      const dy = y - lastTrail.y;
+      if (Math.sqrt(dx * dx + dy * dy) >= TRAIL_DIST) {
+        spawnBurstHeart(x, y);
+        lastTrail = { x, y };
+      }
     }
 
     document.addEventListener('pointerdown', e => {
-      pressPos = { x: e.clientX, y: e.clientY };
-      lastTrail = { x: e.clientX, y: e.clientY };
-      const count = 5 + Math.floor(Math.random() * 4);
-      for (let i = 0; i < count; i++) spawnBurstHeart(e.clientX, e.clientY);
-      holdInterval = setInterval(() => {
-        if (pressPos) spawnBurstHeart(pressPos.x, pressPos.y);
-      }, 120);
+      if (e.pointerType === 'touch') return;
+      startPress(e.clientX, e.clientY);
     });
-
     document.addEventListener('pointermove', e => {
-      if (!pressPos || !lastTrail) return;
-      pressPos = { x: e.clientX, y: e.clientY };
-      const dx = e.clientX - lastTrail.x;
-      const dy = e.clientY - lastTrail.y;
-      if (Math.sqrt(dx * dx + dy * dy) >= TRAIL_DIST) {
-        spawnBurstHeart(e.clientX, e.clientY);
-        lastTrail = { x: e.clientX, y: e.clientY };
-      }
+      if (e.pointerType === 'touch') return;
+      movePress(e.clientX, e.clientY);
     });
+    document.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') stopPress(); });
+    document.addEventListener('pointercancel', e => { if (e.pointerType !== 'touch') stopPress(); });
 
-    document.addEventListener('pointerup', stopPress);
-    document.addEventListener('pointercancel', stopPress);
+    document.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      startPress(t.clientX, t.clientY);
+    }, { passive: false });
+    document.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      movePress(t.clientX, t.clientY);
+    }, { passive: false });
+    document.addEventListener('touchend', stopPress);
+    document.addEventListener('touchcancel', stopPress);
     document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // PWA service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
