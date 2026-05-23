@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4a7b9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Our Story" />
+  <title>Our Story</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 30%, #f48fb1 60%, #fce4ec 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 12s ease infinite;
+      font-family: 'Lato', sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating hearts */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -60px;
+      font-size: 1.4rem;
+      opacity: 0;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.2; }
+      100% { transform: translateY(-110vh) rotate(30deg) scale(1.2); opacity: 0; }
+    }
+
+    /* Card */
+    .card {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 2rem;
+      padding: 2.8rem 3rem;
+      text-align: center;
+      max-width: 420px;
+      width: 90vw;
+      box-shadow: 0 8px 48px rgba(244, 143, 177, 0.25), 0 2px 8px rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 10;
+    }
+
+    .emoji-top {
+      font-size: 2.2rem;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .label {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c2185b;
+      margin-bottom: 0.8rem;
+    }
+
+    .day-number {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4rem, 16vw, 6.5rem);
+      font-weight: 700;
+      color: #ad1457;
+      line-height: 1;
+      margin-bottom: 0.15rem;
+    }
+
+    .day-word {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: #e91e8c;
+      margin-bottom: 1.6rem;
+      letter-spacing: 0.04em;
+    }
+
+    .divider {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #f48fb1, transparent);
+      margin: 0 auto 1.6rem;
+      border-radius: 1px;
+    }
+
+    .breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 1.6rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .unit-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ad1457;
+      line-height: 1;
+    }
+
+    .unit-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e91e8c;
+      opacity: 0.75;
+    }
+
+    .unit-sep {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #f48fb1;
+      align-self: center;
+      padding-bottom: 0.6rem;
+    }
+
+    .clock {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      color: #c2185b;
+      opacity: 0.7;
+      margin-bottom: 1.4rem;
+    }
+
+    .since {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: #c2185b;
+      opacity: 0.65;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hearts" id="hearts"></div>
+
+  <div class="card">
+    <span class="emoji-top">🌸</span>
+    <p class="label">on est ensemble depuis</p>
+    <div class="day-number" id="totalDays">—</div>
+    <div class="day-word">jours</div>
+    <div class="divider"></div>
+    <div class="breakdown">
+      <div class="unit">
+        <span class="unit-value" id="years">—</span>
+        <span class="unit-label">ans</span>
+      </div>
+      <div class="unit-sep">·</div>
+      <div class="unit">
+        <span class="unit-value" id="months">—</span>
+        <span class="unit-label">mois</span>
+      </div>
+      <div class="unit-sep">·</div>
+      <div class="unit">
+        <span class="unit-value" id="days">—</span>
+        <span class="unit-label">jours</span>
+      </div>
+    </div>
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="since">depuis le 16 mars 2024 💕</div>
+  </div>
+
+  <script>
+    const START = new Date('2024-03-16T00:00:00');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function calcDiff(now) {
+      let y = now.getFullYear() - START.getFullYear();
+      let m = now.getMonth()    - START.getMonth();
+      let d = now.getDate()     - START.getDate();
+
+      if (d < 0) {
+        m--;
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        d += prevMonth.getDate();
+      }
+      if (m < 0) { y--; m += 12; }
+
+      const totalDays = Math.floor((now - START) / 86400000);
+      return { y, m, d, totalDays };
+    }
+
+    function tick() {
+      const now = new Date();
+      const { y, m, d, totalDays } = calcDiff(now);
+
+      document.getElementById('totalDays').textContent = totalDays.toLocaleString();
+      document.getElementById('years').textContent  = y;
+      document.getElementById('months').textContent = m;
+      document.getElementById('days').textContent   = d;
+      document.getElementById('clock').textContent  =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+
+    tick();
+    setInterval(tick, 1000);
+
+    // Floating hearts
+    const emojis = ['🩷','💕','✨','🌸','💗','💝'];
+    const container = document.getElementById('hearts');
+
+    function spawnHeart() {
+      const el = document.createElement('span');
+      el.className = 'heart';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left  = Math.random() * 100 + 'vw';
+      const dur = 7 + Math.random() * 8;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay   = Math.random() * 4 + 's';
+      el.style.fontSize = (0.9 + Math.random() * 1.2) + 'rem';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 4) * 1000);
+    }
+
+    for (let i = 0; i < 12; i++) setTimeout(spawnHeart, i * 600);
+    setInterval(spawnHeart, 1800);
+
+    // PWA service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
